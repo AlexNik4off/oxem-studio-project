@@ -1,51 +1,60 @@
 import styles from "./Calc.module.scss";
+import { Input } from "./input/Input";
+import { PercentInput } from "./input/PercentInput";
+import CN from "classnames";
+import { ResultItem } from "./resultItem/ResultItem";
+import { useState } from "react";
 
 export const Calc = () => {
+  const [price, setPrice] = useState(3300000);
+  const [percent, setPercent] = useState(13);
+  const [term, setTerm] = useState(1);
+  const absoluteValue = Math.round((percent / 100) * price);
+  const monthPay = Math.round(
+    (price - absoluteValue) *
+      ((0.035 * Math.pow(1 + 0.035, term)) / (Math.pow(1 + 0.035, term) - 1))
+  );
+  const summ = Math.round(absoluteValue + term * monthPay);
+
+  const setValue = ({ target }) => {
+    let { value, min, max } = target;
+    value = Math.max(Number(min), Math.min(Number(max), Number(value)));
+
+    setPrice(value);
+  };
+
   return (
-    <section>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1>Рассчитайте стоимость автомобиля в лизинг</h1>
-        </div>
-        <div className={styles.input_container}>
-          <p>Стоимость автомобиля</p>
-          <div className={styles.input}>
-            <span className={styles.value_container}>
-              <span className={styles.value}>0</span>
-            </span>
-            <input type="range" min="0" max="100"></input>
-          </div>
-        </div>
-        <div className={styles.input_container2}>
-          <p>Первоначальный взнос</p>
-          <div className={styles.input2}>
-            <div>
-              <span>0</span>
-            </div>
-            <input type="range" min="0" max="100"></input>
-          </div>
-        </div>
-        <div className={styles.input_container3}>
-          <p>Срок лизинга</p>
-          <div className={styles.input3}>
-            <div>
-              <span>0</span>
-            </div>
-            <input type="range" min="0" max="100"></input>
-          </div>
-        </div>
-        <div className={styles.calculation_container}>
-          <div className={styles.calculation}>
-            <p>Сумма договора лизинга</p>
-            <h2>0</h2>
-          </div>
-        </div>
-        <div className={styles.calculation_container2}>
-          <div className={styles.calculation2}>
-            <p>Ежемесячный платеж от</p>
-            <h2>0</h2>
-          </div>
-        </div>
+    <section className={styles.container}>
+      <h1>Рассчитайте стоимость автомобиля в лизинг</h1>
+      <div className={CN(styles.row, styles.input_row)}>
+        <Input
+          label={"Стоимость автомобиля"}
+          value={price}
+          min={1000000}
+          max={6000000}
+          symbol={"₽"}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+        <PercentInput
+          label={"Первоначальный взнос"}
+          min={10}
+          max={60}
+          value={percent}
+          absoluteValue={absoluteValue}
+          onChange={(e) => setPercent(e.target.value)}
+        />
+        <Input
+          label={"Срок лизинга"}
+          min={1}
+          max={60}
+          value={term}
+          symbol={"мес."}
+          onChange={(e) => setTerm(e.target.value)}
+        />
+      </div>
+      <div className={CN(styles.row, styles.calc_row)}>
+        <ResultItem label={"Сумма договора лизинга"} value={summ} />
+        <ResultItem label={"Ежемесячный платеж"} value={monthPay} />
         <div className={styles.button_container}>
           <button className={styles.button}>
             <span className={styles.button_text}>Оставить заявку</span>
